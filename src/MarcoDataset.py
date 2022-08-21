@@ -18,7 +18,7 @@ class MarcoDataset(Dataset):
         self.max_seq_len = max_seq_len
         # load queries
         self.queries = pd.read_csv(
-            os.path.join(self.data_dir, f"msmarco-doc{mode}-queries.tsv"),
+            os.path.join(self.data_dir, f"queries.doc{mode}.tsv"),
             sep="\t",
             header=None,
             names=["qid", "query_text"],
