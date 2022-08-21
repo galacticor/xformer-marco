@@ -26,7 +26,7 @@ class TransformerMarco(pl.LightningModule):
     def __init__(self, hparams: ArgParams):
         # super().__init__()
         super(TransformerMarco, self).__init__()
-        self.hparams = hparams
+        self.save_hyperparameters(hparams)
         self.tokenizer = LongformerTokenizer.from_pretrained(hparams.model_name)
         self.model = LongformerForSequenceClassification.from_pretrained(
             hparams.model_name
