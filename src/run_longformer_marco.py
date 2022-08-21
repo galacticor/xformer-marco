@@ -10,6 +10,7 @@ from pytorch_lightning.loggers import TensorBoardLogger
 import os
 
 from pytorch_lightning import seed_everything
+from constants import DATA_DIR
 
 from specs import ArgParams
 
@@ -162,7 +163,7 @@ if __name__ == "__main__":
         learning_rate=3e-5,
         num_warmup_steps=1000,
         num_training_steps=120000,
-        data_dir="../input/msmarco-document",
+        data_dir=DATA_DIR,
         max_seq_len=1536,
         data_loader_bs=4,
         val_data_loader_bs=2,
