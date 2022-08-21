@@ -9,6 +9,6 @@ WORKDIR /app
 COPY requirements.txt /app
 RUN pip install -r requirements.txt
 
-COPY . /app
+COPY ./src /app
 
 CMD ["python", "/app/src/run_longformer_marco.py"]
