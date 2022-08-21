@@ -11,6 +11,7 @@ import torch
 import torch.nn.functional as F
 
 from MarcoDataset import MarcoDataset
+from .specs import ArgParams
 
 
 class TransformerMarco(pl.LightningModule):
@@ -22,7 +23,7 @@ class TransformerMarco(pl.LightningModule):
        configure_optimizers: configure optimizers
     """
 
-    def __init__(self, hparams):
+    def __init__(self, hparams: ArgParams):
         # super().__init__()
         super(TransformerMarco, self).__init__()
         self.hparams = hparams
@@ -48,7 +49,7 @@ class TransformerMarco(pl.LightningModule):
     def configure_optimizers(self):
         optimizer = AdamW(
             self.parameters(),
-            lr=self.hparams.lr,
+            lr=self.hparams.learning_rate,
             betas=(0.9, 0.999),
             weight_decay=0.01,
             correct_bias=False,

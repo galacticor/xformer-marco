@@ -1,17 +1,19 @@
 import os
 import pandas as pd
 import torch
-
 from torch.utils.data import Dataset
+
+from constants import DATA_DIR, DOCS_FILE
 
 
 class MarcoDataset(Dataset):
     """
     Dataset abstraction for MS MARCO document re-ranking.
     """
-
-    def __init__(self, data_dir, mode, tokenizer, max_seq_len=512, args=None):
-        self.data_dir = data_dir
+    data_dir = DATA_DIR
+    docs_file = DOCS_FILE
+    def __init__(self, data_dir=None, mode="train", tokenizer=None, max_seq_len=512, args=None):
+        self.data_dir = data_dir or self.data_dir
         self.tokenizer = tokenizer
         self.max_seq_len = max_seq_len
         # load queries
@@ -39,7 +41,7 @@ class MarcoDataset(Dataset):
         # load documents TOO BIG TO LOAD THEM!
         if self.load_documents_mode == "memory":
             self.documents = pd.read_csv(
-                os.path.join(self.data_dir, "msmarco-docs.tsv"),
+                self.docs_file,
                 sep="\t",
                 header=None,
                 names=["did", "url", "title", "doc_text"],
@@ -87,11 +89,12 @@ class MarcoDataset(Dataset):
         if self.load_documents_mode == "memory":
             document = self.documents.loc[x.did].doc_text  # too slow too big
         elif self.load_documents_mode == "lookup":
-            doc_file = open(os.path.join(self.data_dir, "msmarco-docs.tsv"), "r")
-            file_offset = self.doc_seek.loc[x.did].tsv_offset
-            doc_file.seek(file_offset, 0)
-            line = doc_file.readline()
-            doc_file.close()
+            line: str
+            with open(self.docs_file, "r") as doc_file:
+                file_offset = self.doc_seek.loc[x.did].tsv_offset
+                doc_file.seek(file_offset, 0)
+                line = doc_file.readline()
+
             splited = line.split("\t")
             # when using num_workers > 1 seek get's fucked up
             assert splited[0] == x.did

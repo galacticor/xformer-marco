@@ -18,8 +18,8 @@ def main(hparams):
     loggers = []
     if hparams.use_wandb:
         wandb_logger = WandbLogger(
-            project="long-marco",
-            entity="usiir",
+            project="xformer-marco",
+            entity="galacticor",
             name=f"Albert-passage-{hparams.slurm_job_id}",
         )
         wandb_logger.log_hyperparams(hparams)
@@ -159,4 +159,4 @@ if __name__ == "__main__":
     if hparams.val_data_loader_bs <= 0:
         hparams.val_data_loader_bs = hparams.data_loader_bs
     print(hparams)
-    main(hparams)
+    # main(hparams)
