@@ -11,4 +11,4 @@ RUN pip install -r requirements.txt
 
 COPY ./src /app
 
-CMD ["python", "/app/src/run_longformer_marco.py"]
+CMD ["python", "/app/run_longformer_marco.py"]
