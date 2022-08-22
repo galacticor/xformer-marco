@@ -6,8 +6,8 @@ from pytorch_lightning.loggers import TensorBoardLogger
 
 from pytorch_lightning import seed_everything
 
-from specs import ArgParams
-from TransformerMarco import TransformerMarco
+from .specs import ArgParams
+from .TransformerMarco import TransformerMarco
 
 seed_everything(42)
 
