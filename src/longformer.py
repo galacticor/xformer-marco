@@ -1,23 +1,18 @@
-import dataclasses
 import pytorch_lightning as pl
-import torch
 
-import argparse
-from TransformerMarco import TransformerMarco
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers.wandb import WandbLogger
 from pytorch_lightning.loggers import TensorBoardLogger
-import os
 
 from pytorch_lightning import seed_everything
-from constants import DATA_DIR
 
 from specs import ArgParams
+from TransformerMarco import TransformerMarco
 
 seed_everything(42)
 
 
-def main(hparams):
+def main(hparams: ArgParams):
     model = TransformerMarco(hparams)
 
     loggers = []
@@ -45,6 +40,7 @@ def main(hparams):
     # Enables distributed training with one line:
     # https://towardsdatascience.com/trivial-multi-node-training-with-pytorch-lightning-ff75dfb809bd
     trainer = pl.Trainer(
+        gpus=hparams.gpus,
         devices=hparams.device,
         num_nodes=hparams.num_nodes,
 #         distributed_backend=hparams.distributed_backend,
@@ -64,34 +60,3 @@ def main(hparams):
         # fast_dev_run=True
     )
     trainer.fit(model)
-
-
-if __name__ == "__main__":
-
-    hparams = ArgParams(
-        run_name="test-1",
-        model_name="allenai/longformer-base-4096",
-        learning_rate=3e-5,
-        num_warmup_steps=1000,
-        num_training_steps=120000,
-        data_dir=DATA_DIR,
-        max_seq_len=4096,
-        data_loader_bs=4,
-        val_data_loader_bs=2,
-        num_workers=1,
-        trainer_batch_size=1,
-        epochs=1,
-        use_wandb=False,
-        use_tensorboard=False,
-        device=0 if torch.cuda.is_available() else 1,
-    #     gpus=1,
-        num_nodes=1,
-    )
-
-    # hparams = parser.parse_args()
-    if hparams.val_data_loader_bs <= 0:
-        hparams.val_data_loader_bs = hparams.data_loader_bs
-
-    hparams = argparse.Namespace(**dataclasses.asdict(hparams))
-    print(hparams)
-    main(hparams)

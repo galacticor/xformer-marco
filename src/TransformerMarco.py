@@ -10,8 +10,8 @@ import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
 
-from MarcoDataset import MarcoDataset
-from specs import ArgParams
+from .msmarco import MarcoDataset
+from .specs import ArgParams
 
 
 class TransformerMarco(pl.LightningModule):
