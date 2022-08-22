@@ -3,7 +3,7 @@ import pandas as pd
 import torch
 from torch.utils.data import Dataset
 
-from constants import DATA_DIR, DOCS_FILE
+from .constants import DATA_DIR, DOCS_FILE
 
 
 class MarcoDataset(Dataset):
