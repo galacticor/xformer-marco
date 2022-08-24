@@ -42,7 +42,7 @@ def main(hparams: ArgParams):
     trainer = pl.Trainer(
         # accelerator=hparams.accelerator,
         gpus=hparams.gpus,
-        devices=hparams.devices,
+        # devices=hparams.devices,
         num_nodes=hparams.num_nodes,
 #         distributed_backend=hparams.distributed_backend,
         # control the effective batch size with this param
