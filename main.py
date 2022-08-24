@@ -29,7 +29,7 @@ if __name__ == "__main__":
             epochs=1,
             use_wandb=False,
             use_tensorboard=False,
-            device=2 if torch.cuda.is_available() else 1,
+            devices=2 if torch.cuda.is_available() else 1,
             accelerator="gpu" if torch.cuda.is_available() else "cpu",
             num_nodes=1,
         )
