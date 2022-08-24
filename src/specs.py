@@ -11,9 +11,10 @@ class ArgParams:
     val_data_loader_bs: int
     num_workers: int
     trainer_batch_size: int
-    device: int = -1
+    devices: int = 1
     use_10_percent_of_dev: bool = False
-    epochs: int = 2
+    epochs: int = 1
+    accelerator: str = "cpu"
     learning_rate: float = 3e-5
     num_warmup_steps: int = 2500
     num_training_steps: int = 120000

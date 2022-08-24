@@ -22,15 +22,15 @@ if __name__ == "__main__":
             num_training_steps=120000,
             data_dir=DATA_DIR,
             max_seq_len=4096,
-            data_loader_bs=4,
-            val_data_loader_bs=2,
+            data_loader_bs=2,
+            val_data_loader_bs=1,
             num_workers=1,
             trainer_batch_size=1,
             epochs=1,
             use_wandb=False,
             use_tensorboard=False,
             device=2 if torch.cuda.is_available() else 1,
-            gpus=1 if torch.cuda.is_available() else 0,
+            accelerator="gpu" if torch.cuda.is_available() else "cpu",
             num_nodes=1,
         )
 

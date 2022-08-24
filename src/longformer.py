@@ -40,8 +40,8 @@ def main(hparams: ArgParams):
     # Enables distributed training with one line:
     # https://towardsdatascience.com/trivial-multi-node-training-with-pytorch-lightning-ff75dfb809bd
     trainer = pl.Trainer(
-        gpus=hparams.gpus,
-        devices=hparams.device,
+        accelerator=hparams.accelerator,
+        devices=hparams.devices,
         num_nodes=hparams.num_nodes,
 #         distributed_backend=hparams.distributed_backend,
         # control the effective batch size with this param
