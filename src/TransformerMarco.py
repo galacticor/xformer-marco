@@ -10,7 +10,7 @@ import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
 
-from .msmarco import MarcoDataset
+from .msmarco import MarcoDataset, MarcoDataset2020
 from .specs import ArgParams
 
 
@@ -35,7 +35,10 @@ class TransformerMarco(pl.LightningModule):
         self.train_dataloader_object = (
             self.val_dataloader_object
         ) = self.test_dataloader_object = None
-        self.DatasetClass = MarcoDataset
+        if hparams.msmarco_ver == "2020":
+            self.DatasetClass = MarcoDataset2020
+        else:
+            self.DatasetClass = MarcoDataset
 
     def forward(self, input_ids, attention_mask, token_type_ids):
 

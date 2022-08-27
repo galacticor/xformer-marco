@@ -30,8 +30,9 @@ if __name__ == "__main__":
             use_wandb=False,
             use_tensorboard=False,
             # devices=2 if torch.cuda.is_available() else 1,
-            gpus=2 if torch.cuda.is_available() else None,
+            gpus=[3] if torch.cuda.is_available() else None,
             num_nodes=2,
+            msmarco_ver="2022",
         )
 
 
