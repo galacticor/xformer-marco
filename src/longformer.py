@@ -19,7 +19,7 @@ def main(hparams: ArgParams):
     if hparams.use_wandb:
         wandb_logger = WandbLogger(
             entity="galacticor",
-            name=f"Albert-passage-{hparams.slurm_job_id}",
+            name=f"MSMARCO-{hparams.model_name}-{hparams.slurm_job_id}",
         )
         wandb_logger.log_hyperparams(hparams)
         loggers.append(wandb_logger)

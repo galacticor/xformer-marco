@@ -1,9 +1,7 @@
 import pandas as pd
 from torch.utils.data import DataLoader, Dataset
 from transformers.optimization import get_linear_schedule_with_warmup, AdamW
-from transformers import AlbertTokenizer, AlbertForSequenceClassification
-from transformers import BertTokenizer, BertForSequenceClassification
-from transformers import LongformerTokenizer, LongformerForSequenceClassification
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 # from modeling_bert_my import BertModel
 import pytorch_lightning as pl
@@ -27,8 +25,8 @@ class TransformerMarco(pl.LightningModule):
         # super().__init__()
         super(TransformerMarco, self).__init__()
         self.save_hyperparameters(hparams)
-        self.tokenizer = LongformerTokenizer.from_pretrained(hparams.model_name)
-        self.model = LongformerForSequenceClassification.from_pretrained(
+        self.tokenizer = AutoTokenizer.from_pretrained(hparams.model_name, use_fast=True)
+        self.model = AutoModelForSequenceClassification.from_pretrained(
             hparams.model_name
         )
 
