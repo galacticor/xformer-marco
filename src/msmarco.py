@@ -169,6 +169,7 @@ class MarcoDataset2020(Dataset):
                 sep="\t",
                 header=None,
                 names=["did", "trec_offset", "tsv_offset"],
+                usecols=["did", "tsv_offset"],
                 index_col="did",
             )
 
