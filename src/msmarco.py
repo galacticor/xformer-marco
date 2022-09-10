@@ -36,6 +36,7 @@ class MarcoDataset(Dataset):
             sep=" ",
             header=None,
             names=["qid", "Q0", "did", "rank", "score", "run"],
+            dtype={'qid': 'int32', "rank": "int8", "score": "float16"},
         )
 
         # downsample the dataset so the positive:negative ratio is 1:10
@@ -148,6 +149,8 @@ class MarcoDataset2020(Dataset):
             sep=" ",
             header=None,
             names=["qid", "Q0", "did", "rank", "score", "run"],
+            dtype={'qid': 'int32', "rank": "int8", "score": "float16"},
+            usecols=["qid", "did", "rank", "score"],
         )
 
         self.load_documents_mode = "lookup"
@@ -171,7 +174,7 @@ class MarcoDataset2020(Dataset):
 
         # downsample the dataset so the positive:negative ratio is 1:10
         if mode == "train":
-            self.top100 = self.top100.sample(frac=0.1, random_state=42).append(
+            self.top100 = self.top100.sample(frac=0.05, random_state=42).append(
                 self.relations[["qid", "did"]], ignore_index=True
             )
             self.top100.drop_duplicates(keep="first", inplace=True)
