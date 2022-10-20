@@ -64,4 +64,7 @@ if __name__ == "__main__":
 
     hparams = argparse.Namespace(**dataclasses.asdict(hparams))
     print(hparams)
-    runner(hparams)
+    trainer, model = runner(hparams)
+
+    trainer.fit(model)
+    trainer.save_checkpoint("latest-epoch.ckpt")
