@@ -21,6 +21,10 @@ if __name__ == "__main__":
         model_name=bert_model_name,
     #     ckpt_path=CHECKPOINT_PATH,
         ckpt_path=None,
+        validation="validation_20k.csv",
+        training="training_50k.csv",
+
+
         learning_rate=1e-4,
         num_warmup_steps=100,
         num_training_steps=30000,
@@ -30,7 +34,7 @@ if __name__ == "__main__":
         val_data_loader_bs=8,
         num_workers=2,
         trainer_batch_size=4,
-        epochs=10,
+        epochs=5,
         use_wandb=True,
         use_tensorboard=False,
         accelerator="gpu" if torch.cuda.is_available() else "cpu",
@@ -47,10 +51,12 @@ if __name__ == "__main__":
     if args[1] == "longformer":
         runner = longformer.main
         hparams.model_name = longformer_model_name
+        hparams.max_seq_len = 4096
 
     if args[1] == "nystromformer":
         runner = longformer.main
         hparams.model_name = nystromformer_model_name
+        hparams.max_seq_len = 4096
 
 
     if hparams.val_data_loader_bs <= 0:
