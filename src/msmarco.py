@@ -4,7 +4,7 @@ import torch
 import json
 from torch.utils.data import Dataset
 
-from .constants import DATA_DIR, DOCS_FILE, DOCS_DIR
+from .constants import DATA_DIR, DOCS_FILE, DOCS_DIR, INPUT_DIR
 from .specs import ArgParams
 
 
@@ -133,7 +133,7 @@ class MarcoDataset(Dataset):
         self.max_seq_len = max_seq_len
 
         self.relations = pd.read_csv(
-            os.path.join(self.data_dir, f"msmarco-doc{mode}-qrels.tsv"),
+            os.path.join(INPUT_DIR, f"msmarco-doc{mode}-qrels.tsv"),
             sep=" ",
             header=None,
             names=["qid", "0", "did", "label"],

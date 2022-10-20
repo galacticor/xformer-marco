@@ -34,7 +34,7 @@ if __name__ == "__main__":
         val_data_loader_bs=8,
         num_workers=2,
         trainer_batch_size=4,
-        epochs=5,
+        epochs=3,
         use_wandb=True,
         use_tensorboard=False,
         accelerator="gpu" if torch.cuda.is_available() else "cpu",
