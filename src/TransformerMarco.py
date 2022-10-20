@@ -1,9 +1,9 @@
 import pandas as pd
-from torch.utils.data import DataLoader, Dataset
-from transformers.optimization import get_linear_schedule_with_warmup, AdamW
+import torch
+from torch.utils.data import DataLoader
+from transformers.optimization import get_constant_schedule_with_warmup
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
-# from modeling_bert_my import BertModel
 import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
@@ -33,10 +33,7 @@ class TransformerMarco(pl.LightningModule):
         self.train_dataloader_object = (
             self.val_dataloader_object
         ) = self.test_dataloader_object = None
-        if hparams.msmarco_ver == "2020":
-            self.DatasetClass = MarcoDataset2020
-        else:
-            self.DatasetClass = MarcoDataset
+        self.DatasetClass = MarcoDataset
 
     def forward(self, input_ids, attention_mask, token_type_ids):
 
@@ -48,21 +45,19 @@ class TransformerMarco(pl.LightningModule):
         return logits
 
     def configure_optimizers(self):
-        optimizer = AdamW(
+        optimizer = torch.optim.AdamW(
             self.parameters(),
             lr=self.hparams.learning_rate,
             betas=(0.9, 0.999),
             weight_decay=0.01,
-            correct_bias=False,
         )
         scheduler = {
-            "scheduler": get_linear_schedule_with_warmup(
+            "scheduler": get_constant_schedule_with_warmup(
                 optimizer,
                 self.hparams.num_warmup_steps,
-                self.hparams.num_training_steps,
             ),
             "interval": "step",
-            "name": "linear_with_warmup",
+            "name": "constant_with_warmup",
         }
         return [optimizer], [scheduler]
 
@@ -135,6 +130,8 @@ class TransformerMarco(pl.LightningModule):
         loss = F.cross_entropy(output, labels.squeeze(1))
         if self.logger:
             self.logger.log_metrics({"train_loss": loss.item()})
+        
+        self.log_dict({"train_loss": loss.item()})
 
         # return {'loss': loss}
         return {"out": output, "labels": labels}
@@ -145,6 +142,8 @@ class TransformerMarco(pl.LightningModule):
         loss = F.cross_entropy(out, labels)
         if self.logger:
             self.logger.log_metrics({"train_loss": loss.item()})
+        
+        self.log_dict({"train_loss": loss.item()})
 
         return {"loss": loss}
 
@@ -155,6 +154,9 @@ class TransformerMarco(pl.LightningModule):
         loss = F.cross_entropy(output, labels.squeeze(1))
         if self.logger:
             self.logger.log_metrics({"val_loss": loss.item()})
+        
+        self.log_dict({"val_loss": loss.item()})
+
         return {"out": output, "idxs": idxs, "labels": labels}
         # return {'loss': loss, 'probs': F.softmax(output, dim=1)[:,1], 'idxs': idxs}
 
@@ -169,6 +171,9 @@ class TransformerMarco(pl.LightningModule):
         loss = F.cross_entropy(out, labels.squeeze(1))
         if self.logger:
             self.logger.log_metrics({"val_loss": loss.item()})
+        
+        self.log_dict({"val_loss": loss.item()})
+
         return {"loss": loss, "probs": F.softmax(out, dim=1)[:, 1], "idxs": idxs}
 
     def validation_epoch_end(self, outputs):
@@ -188,6 +193,8 @@ class TransformerMarco(pl.LightningModule):
             self.logger.log_metrics(
                 {"val_epoch_loss": avg_loss, "mrr": mrr, "mrr10": mrr10}
             )
+        
+        self.log_dict({"val_epoch_loss": avg_loss, "mrr": mrr, "mrr10": mrr10})
 
         print(f"\nDEV:: avg-LOSS: {avg_loss} || MRR: {mrr} || MRR@10: {mrr10}")
 
@@ -196,7 +203,6 @@ class TransformerMarco(pl.LightningModule):
             "mrr10": torch.tensor(mrr10),
             "progress_bar": {"val_epoch_loss": avg_loss},
         }  # ,
-        # 'log': {'val_epoch_loss': avg_loss, 'mrr': mrr, 'mrr10': mrr10}}
 
     def _get_mrr_score(self, outputs, k=None, mode="dev"):
         """Calculates MRR@k (Mean Reciprocal Rank)."""
@@ -213,16 +219,21 @@ class TransformerMarco(pl.LightningModule):
 
             top100_qids = ds.top100.iloc[x["idxs"].cpu()].qid.values.tolist()
             top100_dids = ds.top100.iloc[x["idxs"].cpu()].did.values.tolist()
-            for qid, did in zip(top100_qids, top100_dids):
-                qids.append(qid)
-                dids.append(did)
-                labels.append(
-                    0
-                    if ds.relations[
-                        (ds.relations["qid"] == qid) & (ds.relations["did"] == did)
-                    ].empty
-                    else 1
-                )
+            top100_labels = ds.top100.iloc[x["idxs"].cpu()].label.values.tolist()
+            qids.extend(top100_qids)
+            dids.extend(top100_dids)
+            labels.extend(top100_labels)
+#             print(len(labels), len(qids), len(dids))
+#             for qid, did in zip(top100_qids, top100_dids):
+#                 qids.append(qid)
+#                 dids.append(did)
+#                 labels.append(
+#                     0
+#                     if ds.relations[
+#                         (ds.relations["qid"] == qid) & (ds.relations["did"] == did)
+#                     ].empty
+#                     else 1
+#                 )
 
         df = pd.DataFrame(
             {"prob": probs, "idx": idxs, "qid": qids, "did": dids, "label": labels}

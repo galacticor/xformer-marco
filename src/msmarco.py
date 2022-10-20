@@ -5,9 +5,10 @@ import json
 from torch.utils.data import Dataset
 
 from .constants import DATA_DIR, DOCS_FILE, DOCS_DIR
+from .specs import ArgParams
 
 
-class MarcoDataset(Dataset):
+class MarcoDataset2022(Dataset):
     """
     Dataset abstraction for MS MARCO document re-ranking.
     """
@@ -120,79 +121,42 @@ class MarcoDataset(Dataset):
         return encoded
 
 
-class MarcoDataset2020(Dataset):
+class MarcoDataset(Dataset):
     """
     Dataset abstraction for MS MARCO document re-ranking.
     """
     data_dir = DATA_DIR
     docs_file = DOCS_FILE
-    def __init__(self, data_dir=None, mode="train", tokenizer=None, max_seq_len=512, args=None):
+    def __init__(self, data_dir=None, mode="train", tokenizer=None, max_seq_len=512, args: ArgParams=None):
         self.data_dir = data_dir or self.data_dir
         self.tokenizer = tokenizer
         self.max_seq_len = max_seq_len
-        # load queries
-        self.queries = pd.read_csv(
-            os.path.join(self.data_dir, f"queries.doc{mode}.tsv"),
-            sep="\t",
-            header=None,
-            names=["qid", "query_text"],
-            index_col="qid",
-        )
+
         self.relations = pd.read_csv(
             os.path.join(self.data_dir, f"msmarco-doc{mode}-qrels.tsv"),
             sep=" ",
             header=None,
             names=["qid", "0", "did", "label"],
         )
-        self.top100 = pd.read_csv(
-            os.path.join(self.data_dir, f"msmarco-doc{mode}-top100"),
-            sep=" ",
-            header=None,
-            names=["qid", "Q0", "did", "rank", "score", "run"],
-            dtype={'qid': 'int32', "rank": "int8", "score": "float16"},
-            usecols=["qid", "did", "rank", "score"],
-        )
-
-        self.load_documents_mode = "lookup"
-        # load documents TOO BIG TO LOAD THEM!
-        if self.load_documents_mode == "memory":
-            self.documents = pd.read_csv(
-                self.docs_file,
-                sep="\t",
-                header=None,
-                names=["did", "url", "title", "doc_text"],
-                index_col="did",
+        if mode == "dev":
+            self.top100 = pd.read_csv(
+                os.path.join(DATA_DIR, args.validation),
+                dtype={'qid': 'int32', 'rank': 'int8', "score": "float16"},
+                usecols=["qid", "did", "rank", "score"],
             )
-        elif self.load_documents_mode == "lookup":
-            self.doc_seek = pd.read_csv(
-                os.path.join(self.data_dir, "msmarco-docs-lookup.tsv"),
-                sep="\t",
-                header=None,
-                names=["did", "trec_offset", "tsv_offset"],
-                usecols=["did", "tsv_offset"],
-                index_col="did",
-            )
-
-        # downsample the dataset so the positive:negative ratio is 1:10
         if mode == "train":
-            self.top100 = self.top100.sample(frac=0.05, random_state=42).append(
-                self.relations[["qid", "did"]], ignore_index=True
+            self.data = pd.read_csv(
+                os.path.join(DATA_DIR, args.training),
+                dtype={'qid': 'int32', "rank": "int8", "score": "float16"},
+                usecols=["qid", "did", "label", "query", "doc"],
             )
-            self.top100.drop_duplicates(keep="first", inplace=True)
-            # shuffle the data so positives are ~ evenly distributed
-            self.top100 = self.top100.sample(frac=1, random_state=42).reset_index(
-                drop=True
+        else:
+            self.data = pd.read_csv(
+                os.path.join(DATA_DIR, args.validation),
+                dtype={'qid': 'int32'},
+                usecols=["qid", "did", "label", "query", "doc"],
             )
 
-        elif mode == "dev" and args.use_10_percent_of_dev:
-            # use 10% of the data for dev during training
-            import numpy as np
-
-            np.random.seed(42)
-            queries = self.top100["qid"].unique()
-            queries = np.random.choice(queries, int(len(queries) / 50), replace=False)
-            print(len(queries))
-            self.top100 = self.top100[self.top100["qid"].isin(queries)]
         print(f"{mode} set len:", len(self.top100))
 
     # needed for map-style torch Datasets
@@ -201,31 +165,8 @@ class MarcoDataset2020(Dataset):
 
     # needed for map-style torch Datasets
     def __getitem__(self, idx):
-        x = self.top100.iloc[idx]
-        query = self.queries.loc[x.qid].query_text
-        if self.load_documents_mode == "memory":
-            document = self.documents.loc[x.did].doc_text  # too slow too big
-        elif self.load_documents_mode == "lookup":
-            line: str
-            with open(self.docs_file, "r") as doc_file:
-                file_offset = self.doc_seek.loc[x.did].tsv_offset
-                doc_file.seek(file_offset, 0)
-                line = doc_file.readline()
-
-            splited = line.split("\t")
-            # when using num_workers > 1 seek get's fucked up
-            assert splited[0] == x.did
-            document = " ".join(splited[3:])
-
-        label = (
-            0
-            if self.relations.loc[
-                (self.relations["qid"] == x.qid) & (self.relations["did"] == x.did)
-            ].empty
-            else 1
-        )
-
-        tensors = self.one_example_to_tensors(query, document, idx, label)
+        x = self.data.iloc[idx]
+        tensors = self.one_example_to_tensors(x["query"], x["doc"], idx, x["label"])
         return tensors
 
     # main method for encoding the example
