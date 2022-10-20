@@ -157,7 +157,7 @@ class MarcoDataset(Dataset):
                 usecols=["qid", "did", "label", "query", "doc"],
             )
 
-        print(f"{mode} set len:", len(self.top100))
+        print(f"{mode} set len:", len(self.data))
 
     # needed for map-style torch Datasets
     def __len__(self):
