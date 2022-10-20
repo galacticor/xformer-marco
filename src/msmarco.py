@@ -182,7 +182,7 @@ class MarcoDataset(Dataset):
             return_overflowing_tokens=False,
             return_special_tokens_mask=False,
             return_token_type_ids=True,
-            pad_to_max_length=True,
+            padding="max_length",
         )
         encoded["attention_mask"] = torch.tensor(encoded["attention_mask"])
 
