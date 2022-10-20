@@ -8,7 +8,7 @@ import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
 
-from .msmarco import MarcoDataset, MarcoDataset2020
+from .msmarco import MarcoDataset, MarcoDataset2022
 from .specs import ArgParams
 
 
