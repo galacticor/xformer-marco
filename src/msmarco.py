@@ -161,7 +161,7 @@ class MarcoDataset(Dataset):
 
     # needed for map-style torch Datasets
     def __len__(self):
-        return len(self.top100)
+        return len(self.data)
 
     # needed for map-style torch Datasets
     def __getitem__(self, idx):
