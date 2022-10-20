@@ -142,7 +142,7 @@ class MarcoDataset(Dataset):
             self.top100 = pd.read_csv(
                 os.path.join(DATA_DIR, args.validation),
                 dtype={'qid': 'int32', 'rank': 'int8', "score": "float16"},
-                usecols=["qid", "did", "rank", "score"],
+                usecols=["qid", "did", "label", "rank", "score"],
             )
         if mode == "train":
             self.data = pd.read_csv(
