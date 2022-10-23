@@ -1,12 +1,15 @@
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 from transformers.optimization import get_constant_schedule_with_warmup
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
+from torchmetrics import RetrievalNormalizedDCG, RetrievalMRR, RetrievalMAP
+from typing import Tuple
 
 from .msmarco import MarcoDataset, MarcoDataset2022
 from .specs import ArgParams
@@ -52,12 +55,16 @@ class TransformerMarco(pl.LightningModule):
             weight_decay=0.01,
         )
         scheduler = {
-            "scheduler": get_constant_schedule_with_warmup(
+            "scheduler": ReduceLROnPlateau(
                 optimizer,
-                self.hparams.num_warmup_steps,
+                factor=0.45,
             ),
+            "frequency": 500,
+#             "interval": "epoch",
+#             "monitor": "val_epoch_loss",
             "interval": "step",
-            "name": "constant_with_warmup",
+            "monitor": "train_loss",
+            "name": "reduce_lr_on_plateau",
         }
         return [optimizer], [scheduler]
 
@@ -186,8 +193,8 @@ class TransformerMarco(pl.LightningModule):
 
         avg_loss = torch.stack([x["loss"] for x in outputs]).mean()
 
-        mrr = self._get_mrr_score(outputs)
-        mrr10 = self._get_mrr_score(outputs, k=10)
+        mrr = self._get_retrieval_score(outputs)
+        mrr10 = self._get_retrieval_score(outputs, k=10)
 
         if self.logger:
             self.logger.log_metrics(
@@ -204,7 +211,7 @@ class TransformerMarco(pl.LightningModule):
             "progress_bar": {"val_epoch_loss": avg_loss},
         }  # ,
 
-    def _get_mrr_score(self, outputs, k=None, mode="dev"):
+    def _get_retrieval_score(self, outputs, k=None, mode="dev") -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor] :
         """Calculates MRR@k (Mean Reciprocal Rank)."""
         if mode == "dev":
             ds = self.val_dataloader_object.dataset
@@ -223,17 +230,6 @@ class TransformerMarco(pl.LightningModule):
             qids.extend(top100_qids)
             dids.extend(top100_dids)
             labels.extend(top100_labels)
-#             print(len(labels), len(qids), len(dids))
-#             for qid, did in zip(top100_qids, top100_dids):
-#                 qids.append(qid)
-#                 dids.append(did)
-#                 labels.append(
-#                     0
-#                     if ds.relations[
-#                         (ds.relations["qid"] == qid) & (ds.relations["did"] == did)
-#                     ].empty
-#                     else 1
-#                 )
 
         df = pd.DataFrame(
             {"prob": probs, "idx": idxs, "qid": qids, "did": dids, "label": labels}
@@ -254,8 +250,20 @@ class TransformerMarco(pl.LightningModule):
                 first_relevant = trues[0] + 1  # pandas zero-indexing
                 mrr += 1.0 / first_relevant
 
-        mrr /= len(df.qid.unique())
-        return mrr
+        # mrr /= len(df.qid.unique())
+        probs = torch.tensor(probs)
+        labels = torch.tensor(labels)
+        qids = torch.tensor(qids)
+        
+        ndcg = RetrievalNormalizedDCG(k=k)
+        mrr = RetrievalMRR(k=k)
+        map_ = RetrievalMAP(k=k)
+    
+        mrr_score = mrr(probs, labels, indexes=qids)
+        ndcg_score = ndcg(probs, labels, indexes=qids)
+        map_score = map_(probs, labels, indexes=qids)
+        
+        return mrr_score, ndcg_score, map_score
 
     @staticmethod
     def collate_fn(batch):

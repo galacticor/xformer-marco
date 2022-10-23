@@ -4,3 +4,4 @@ datasets==2.4.0
 pytorch_lightning==1.6.5
 wandb==0.13.0
 injector==0.20.1
+torchmetrics==0.9.3
