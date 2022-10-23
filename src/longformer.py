@@ -47,7 +47,7 @@ def main(hparams: ArgParams, model=None):
         resume_from_checkpoint=hparams.ckpt_path,
 #         distributed_backend=hparams.distributed_backend,
         # control the effective batch size with this param
-#         accumulate_grad_batches=hparams.trainer_batch_size,
+        accumulate_grad_batches=hparams.trainer_batch_size,
         # Training will stop if max_steps or max_epochs have reached (earliest).
         max_epochs=hparams.epochs,
 #         max_steps=hparams.num_training_steps,
