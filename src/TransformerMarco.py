@@ -193,23 +193,29 @@ class TransformerMarco(pl.LightningModule):
 
         avg_loss = torch.stack([x["loss"] for x in outputs]).mean()
 
-        mrr = self._get_retrieval_score(outputs)
-        mrr10 = self._get_retrieval_score(outputs, k=10)
+        mrr, ndcg, _map = self._get_retrieval_score(outputs)
+        mrr10, ndcg10, map10 = self._get_retrieval_score(outputs, k=10)
+        
+        metric_dict = {
+            "val_epoch_loss": avg_loss, 
+            "mrr": mrr, 
+            "mrr10": mrr10, 
+            "ndcg": ndcg,
+            "ndcg10": ndcg10,
+            "map": _map,
+            "map10": map10,
+        }
 
         if self.logger:
-            self.logger.log_metrics(
-                {"val_epoch_loss": avg_loss, "mrr": mrr, "mrr10": mrr10}
-            )
+            self.logger.log_metrics(metric_dict)
+
+        self.log_dict(metric_dict)
+
+        print(f"\nDEV:: avg-LOSS: {avg_loss} || MRR: {mrr} || MRR@10: {mrr10} || NDCG: {ndcg} || NDCG@10: {ndcg10} || MAP: {_map} || MAP@10: {map10}")
         
-        self.log_dict({"val_epoch_loss": avg_loss, "mrr": mrr, "mrr10": mrr10})
+        metric_dict["progress_bar"] = metric_dict
 
-        print(f"\nDEV:: avg-LOSS: {avg_loss} || MRR: {mrr} || MRR@10: {mrr10}")
-
-        return {
-            "val_epoch_loss": avg_loss,
-            "mrr10": torch.tensor(mrr10),
-            "progress_bar": {"val_epoch_loss": avg_loss},
-        }  # ,
+        return metric_dict
 
     def _get_retrieval_score(self, outputs, k=None, mode="dev") -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor] :
         """Calculates MRR@k (Mean Reciprocal Rank)."""
