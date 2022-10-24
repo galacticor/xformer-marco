@@ -20,7 +20,7 @@ def main(hparams: ArgParams, model=None):
     if hparams.use_wandb:
         wandb_logger = WandbLogger(
             entity="widyantohadi",
-            name=f"{hparams.model_name}_{hparams.run_name}_bs{hparams.data_loader_bs}:{hparams.val_data_loader_bs}",
+            name=f"{hparams.model_name}_{hparams.run_name}_sz{hparams.training}:{hparams.validation}_bs{hparams.data_loader_bs}:{hparams.val_data_loader_bs}",
         )
         wandb_logger.log_hyperparams(hparams)
         loggers.append(wandb_logger)

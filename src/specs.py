@@ -23,5 +23,5 @@ class ArgParams:
     gpus: int = 1
     num_nodes: int = 1
     ckpt_path: str = None
-    validation: str = "validation_20k.csv"
-    training: str = "training_50k.csv"
+    validation: int = 20
+    training: int = 50

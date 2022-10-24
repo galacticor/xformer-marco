@@ -17,12 +17,12 @@ if __name__ == "__main__":
     bert_model_name = "bert-base-uncased"
 
     hparams = ArgParams(
-        run_name="MSMARCO50k-20k",
+        run_name="MSMARCO",
         model_name=bert_model_name,
     #     ckpt_path=CHECKPOINT_PATH,
         ckpt_path=None,
-        validation="validation_20k.csv",
-        training="training_50k.csv",
+        validation=20,
+        training=50,
 
 
         learning_rate=1e-4,

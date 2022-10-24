@@ -140,19 +140,19 @@ class MarcoDataset(Dataset):
         )
         if mode == "dev":
             self.top100 = pd.read_csv(
-                os.path.join(DATA_DIR, args.validation),
+                os.path.join(DATA_DIR, f"validation_{args.validation}k.csv"),
                 dtype={'qid': 'int32', 'rank': 'int8', "score": "float16"},
                 usecols=["qid", "did", "label", "rank", "score"],
             )
         if mode == "train":
             self.data = pd.read_csv(
-                os.path.join(DATA_DIR, args.training),
+                os.path.join(DATA_DIR, f"training_{args.training}k.csv"),
                 dtype={'qid': 'int32', "rank": "int8", "score": "float16"},
                 usecols=["qid", "did", "label", "query", "doc"],
             )
         else:
             self.data = pd.read_csv(
-                os.path.join(DATA_DIR, args.validation),
+                os.path.join(DATA_DIR, f"validation_{args.validation}k.csv"),
                 dtype={'qid': 'int32'},
                 usecols=["qid", "did", "label", "query", "doc"],
             )
