@@ -45,12 +45,12 @@ def main(hparams: ArgParams, model=None):
         devices=hparams.device,
         num_nodes=hparams.num_nodes,
         resume_from_checkpoint=hparams.ckpt_path,
-#         distributed_backend=hparams.distributed_backend,
+        # distributed_backend=hparams.distributed_backend,
         # control the effective batch size with this param
         accumulate_grad_batches=hparams.trainer_batch_size,
         # Training will stop if max_steps or max_epochs have reached (earliest).
         max_epochs=hparams.epochs,
-#         max_steps=hparams.num_training_steps,
+        # max_steps=hparams.num_training_steps,
         logger=loggers,
         callbacks=[checkpoint_callback],
         strategy=None if hparams.accelerator == "cpu" else "dp",
@@ -58,7 +58,6 @@ def main(hparams: ArgParams, model=None):
         # progress_bar_callback=False,
         # progress_bar_refresh_rate=0,
         # use_amp=True --> use 16bit precision
-        # val_check_interval=0.5, # val 4 times during 1 train epoch
         val_check_interval=hparams.val_check_interval,  # val every N steps
         # num_sanity_val_steps=5,
         # fast_dev_run=True,

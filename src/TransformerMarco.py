@@ -60,8 +60,8 @@ class TransformerMarco(pl.LightningModule):
                 factor=0.45,
             ),
             "frequency": 900,
-#             "interval": "epoch",
-#             "monitor": "val_epoch_loss",
+            # "interval": "epoch",
+            # "monitor": "val_epoch_loss",
             "interval": "step",
             "monitor": "train_loss",
             "name": "reduce_lr_on_plateau",
@@ -193,17 +193,15 @@ class TransformerMarco(pl.LightningModule):
 
         avg_loss = torch.stack([x["loss"] for x in outputs]).mean()
 
-        mrr, ndcg, _map = self._get_retrieval_score(outputs)
-        mrr10, ndcg10, map10 = self._get_retrieval_score(outputs, k=10)
+        mrr, ndcg = self._get_retrieval_score(outputs)
+        mrr10, ndcg10 = self._get_retrieval_score(outputs, k=10)
         
         metric_dict = {
             "val_epoch_loss": avg_loss, 
             "mrr": mrr, 
             "mrr10": mrr10, 
             "ndcg": ndcg,
-            "ndcg10": ndcg10,
-            "map": _map,
-            "map10": map10,
+            "ndcg10": ndcg10
         }
 
         if self.logger:
@@ -211,13 +209,13 @@ class TransformerMarco(pl.LightningModule):
 
         self.log_dict(metric_dict)
 
-        print(f"\nDEV:: avg-LOSS: {avg_loss} || MRR: {mrr} || MRR@10: {mrr10} || NDCG: {ndcg} || NDCG@10: {ndcg10} || MAP: {_map} || MAP@10: {map10}")
+        print(f"\nDEV:: avg-LOSS: {avg_loss} || MRR: {mrr} || MRR@10: {mrr10} || NDCG: {ndcg} || NDCG@10: {ndcg10}")
         
         metric_dict["progress_bar"] = metric_dict
 
         return metric_dict
 
-    def _get_retrieval_score(self, outputs, k=None, mode="dev") -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor] :
+    def _get_retrieval_score(self, outputs, k=None, mode="dev") -> Tuple[torch.Tensor, torch.Tensor] :
         """Calculates MRR@k (Mean Reciprocal Rank)."""
         if mode == "dev":
             ds = self.val_dataloader_object.dataset
@@ -256,20 +254,18 @@ class TransformerMarco(pl.LightningModule):
                 first_relevant = trues[0] + 1  # pandas zero-indexing
                 mrr += 1.0 / first_relevant
 
-        # mrr /= len(df.qid.unique())
+        mrr /= len(df.qid.unique())
+
         probs = torch.tensor(probs)
         labels = torch.tensor(labels)
         qids = torch.tensor(qids)
-        
+
         ndcg = RetrievalNormalizedDCG(k=k)
-        mrr = RetrievalMRR(k=k)
-        map_ = RetrievalMAP(k=k)
-    
-        mrr_score = mrr(probs, labels, indexes=qids)
+
+        mrr_score = torch.tensor(mrr)
         ndcg_score = ndcg(probs, labels, indexes=qids)
-        map_score = map_(probs, labels, indexes=qids)
-        
-        return mrr_score, ndcg_score, map_score
+
+        return mrr_score, ndcg_score
 
     @staticmethod
     def collate_fn(batch):
