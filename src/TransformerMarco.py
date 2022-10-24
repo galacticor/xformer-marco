@@ -8,7 +8,7 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
-from torchmetrics import RetrievalNormalizedDCG, RetrievalMRR, RetrievalMAP
+from torchmetrics import RetrievalNormalizedDCG
 from typing import Tuple
 
 from .msmarco import MarcoDataset, MarcoDataset2022
@@ -193,15 +193,17 @@ class TransformerMarco(pl.LightningModule):
 
         avg_loss = torch.stack([x["loss"] for x in outputs]).mean()
 
-        mrr, ndcg = self._get_retrieval_score(outputs)
-        mrr10, ndcg10 = self._get_retrieval_score(outputs, k=10)
+        mrr, ndcg, rmap = self._get_retrieval_score(outputs)
+        mrr10, ndcg10, rmap10 = self._get_retrieval_score(outputs, k=10)
         
         metric_dict = {
             "val_epoch_loss": avg_loss, 
             "mrr": mrr, 
             "mrr10": mrr10, 
             "ndcg": ndcg,
-            "ndcg10": ndcg10
+            "ndcg10": ndcg10,
+            "map": rmap,
+            "map10": rmap10,
         }
 
         if self.logger:
@@ -209,13 +211,13 @@ class TransformerMarco(pl.LightningModule):
 
         self.log_dict(metric_dict)
 
-        print(f"\nDEV:: avg-LOSS: {avg_loss} || MRR: {mrr} || MRR@10: {mrr10} || NDCG: {ndcg} || NDCG@10: {ndcg10}")
+        print(f"\nDEV:: avg-LOSS: {avg_loss} || MRR: {mrr} || MRR@10: {mrr10} || NDCG: {ndcg} || NDCG@10: {ndcg10} || MAP: {rmap} || MAP@10: {rmap10}")
         
         metric_dict["progress_bar"] = metric_dict
 
         return metric_dict
 
-    def _get_retrieval_score(self, outputs, k=None, mode="dev") -> Tuple[torch.Tensor, torch.Tensor] :
+    def _get_retrieval_score(self, outputs, k=None, mode="dev") -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor] :
         """Calculates MRR@k (Mean Reciprocal Rank)."""
         if mode == "dev":
             ds = self.val_dataloader_object.dataset
@@ -238,14 +240,17 @@ class TransformerMarco(pl.LightningModule):
         df = pd.DataFrame(
             {"prob": probs, "idx": idxs, "qid": qids, "did": dids, "label": labels}
         )
+        
         mrr = 0.0
+        rmap = 0.0
         for qid in df.qid.unique():
-            tmp = (
+            tmp: pd.DataFrame = (
                 df[df["qid"] == qid].sort_values("prob", ascending=False).reset_index()
             )
             if k:
                 tmp = tmp.head(k)
             trues = tmp.index[tmp["label"] == 1].tolist()
+            targets = tmp["label"].tolist()
             # if there is no relevant docs for this query
             if not trues:
                 # add to total number of qids or not?
@@ -254,7 +259,14 @@ class TransformerMarco(pl.LightningModule):
                 first_relevant = trues[0] + 1  # pandas zero-indexing
                 mrr += 1.0 / first_relevant
 
-        mrr /= len(df.qid.unique())
+                prec = lambda x: sum(x) / len(x)
+                sum_all = sum(targets)
+                for i in range(len(targets)):
+                    rmap += (prec(targets[:i + 1]) / sum_all) * targets[i]
+
+        nqid = df.qid.nunique()
+        mrr /= nqid
+        rmap /= nqid
 
         probs = torch.tensor(probs)
         labels = torch.tensor(labels)
@@ -263,9 +275,10 @@ class TransformerMarco(pl.LightningModule):
         ndcg = RetrievalNormalizedDCG(k=k)
 
         mrr_score = torch.tensor(mrr)
+        rmap_score = torch.tensor(rmap)
         ndcg_score = ndcg(probs, labels, indexes=qids)
 
-        return mrr_score, ndcg_score
+        return mrr_score, ndcg_score, rmap_score
 
     @staticmethod
     def collate_fn(batch):
