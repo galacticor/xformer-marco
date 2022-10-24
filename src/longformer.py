@@ -35,7 +35,7 @@ def main(hparams: ArgParams, model=None):
         verbose=True,
         monitor="val_epoch_loss",
         mode="min",
-        filename='{epoch}-{step}-{val_epoch_loss:.2f}'
+        filename=hparams.model_name + '_{epoch}-{step}-{val_epoch_loss:.2f}'
     )
 
     # This Trainer handles most of the stuff.
