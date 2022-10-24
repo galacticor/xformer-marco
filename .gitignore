@@ -131,3 +131,7 @@ dmypy.json
 # data masmarco
 data/msmarco*
 data/docv2*
+
+# training data
+checkpoints/
+wandb/
