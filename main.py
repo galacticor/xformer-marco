@@ -67,4 +67,4 @@ if __name__ == "__main__":
     trainer, model = runner(hparams)
 
     trainer.fit(model)
-    trainer.save_checkpoint(f"{hparams.model_name}_{hparams.run_name}_sz{hparams.training}:{hparams.validation}_bs{hparams.data_loader_bs}:{hparams.val_data_loader_bs}")
+    trainer.save_checkpoint(f"{hparams.model_name}_{hparams.run_name}_sz{hparams.training}:{hparams.validation}_bs{hparams.data_loader_bs}:{hparams.val_data_loader_bs}_last.ckpt")
