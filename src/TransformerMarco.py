@@ -59,11 +59,11 @@ class TransformerMarco(pl.LightningModule):
                 optimizer,
                 factor=0.45,
             ),
-            "frequency": 900,
-            # "interval": "epoch",
-            # "monitor": "val_epoch_loss",
-            "interval": "step",
-            "monitor": "train_loss",
+            # "frequency": 900,
+            # "interval": "step",
+            # "monitor": "train_loss",
+            "interval": "epoch",
+            "monitor": "val_epoch_loss",
             "name": "reduce_lr_on_plateau",
         }
         return [optimizer], [scheduler]
