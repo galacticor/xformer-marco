@@ -8,7 +8,7 @@ from src.constants import INPUT_DIR
 from src.specs import ArgParams
 
 
-def validation(params: ArgParams) -> ArgParams:
+def validate(params: ArgParams) -> ArgParams:
     params.device = [int(x) for x in params.device]
 
     return params
@@ -69,6 +69,12 @@ if __name__ == "__main__":
     parser.add_argument("--ckpt_path", type=str, default=None,
                         help="Checkpoint Path")
 
+    parser.add_argument("--validation", type=int, default=20,
+                        help="Validation Size")
+
+    parser.add_argument("--training", type=int, default=100,
+                        help="Training Size")
+
     param_from_parser = parser.parse_args()
 
     if param_from_parser.model_name == "bert":
@@ -95,8 +101,10 @@ if __name__ == "__main__":
     hparams.num_workers = param_from_parser.num_workers
     hparams.device = param_from_parser.device
     hparams.ckpt_path = param_from_parser.ckpt_path
+    hparams.training = param_from_parser.training
+    hparams.validation = param_from_parser.validation
 
-    hparams = validation(hparams)
+    hparams = validate(hparams)
 
     hparams = argparse.Namespace(**dataclasses.asdict(hparams))
     print(hparams)
