@@ -57,7 +57,7 @@ class TransformerMarco(pl.LightningModule):
         scheduler = {
             "scheduler": ReduceLROnPlateau(
                 optimizer,
-                factor=0.45,
+                factor=0.6,
                 patience=4,
             ),
             "frequency": 2000,
