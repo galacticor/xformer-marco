@@ -62,7 +62,7 @@ class TransformerMarco(pl.LightningModule):
             # "frequency": 900,
             # "interval": "step",
             # "monitor": "train_loss",
-            "interval": "epoch",
+            "interval": "epochs",
             "monitor": "val_epoch_loss",
             "name": "reduce_lr_on_plateau",
         }
