@@ -20,6 +20,7 @@ if __name__ == "__main__":
     longformer_model_name = "allenai/longformer-base-4096"
     nystromformer_model_name = "uw-madison/nystromformer-4096"
     reformer_model_name = "robingeibel/reformer-finetuned-big_patent-4096"
+    bigbird_model_name = "google/bigbird-roberta-base"
     bert_model_name = "bert-base-uncased"
 
     hparams = ArgParams(
@@ -90,6 +91,11 @@ if __name__ == "__main__":
     if param_from_parser.model_name == "nystromformer":
         runner = longformer.main
         hparams.model_name = nystromformer_model_name
+        hparams.max_seq_len = 4096
+
+    if param_from_parser.model_name == "bigbird":
+        runner = longformer.main
+        hparams.model_name = bigbird_model_name
         hparams.max_seq_len = 4096
 
 
