@@ -31,7 +31,7 @@ def main(hparams: ArgParams, model=None):
         loggers.append(tb_logger)
 
     checkpoint_callback = ModelCheckpoint(
-        save_top_k=hparams.epochs,
+        save_top_k=hparams.epochs * 3,
         verbose=True,
         monitor="val_epoch_loss",
         mode="min",
