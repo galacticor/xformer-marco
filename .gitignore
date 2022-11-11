@@ -135,3 +135,4 @@ data/docv2*
 # training data
 checkpoints/
 wandb/
+log/
