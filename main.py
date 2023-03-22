@@ -75,6 +75,9 @@ if __name__ == "__main__":
 
     parser.add_argument("--training", type=int, default=100,
                         help="Training Size")
+    
+    parser.add_argument("--mode", type=str, default="train",
+                        help="Mode: train, test, inference")
 
     param_from_parser = parser.parse_args()
 
@@ -112,9 +115,13 @@ if __name__ == "__main__":
 
     hparams = validate(hparams)
 
-    hparams = argparse.Namespace(**dataclasses.asdict(hparams))
+    hparams: ArgParams = argparse.Namespace(**dataclasses.asdict(hparams))
     print(hparams)
     trainer, model = runner(hparams)
 
-    trainer.fit(model)
-    trainer.save_checkpoint(f"{hparams.model_name}_{hparams.run_name}_sz{hparams.training}:{hparams.validation}_bs{hparams.data_loader_bs}:{hparams.val_data_loader_bs}_last.ckpt")
+    if hparams.mode.lower() == "train":
+        trainer.fit(model)
+        trainer.save_checkpoint(f"{hparams.model_name}_{hparams.run_name}_sz{hparams.training}:{hparams.validation}_bs{hparams.data_loader_bs}:{hparams.val_data_loader_bs}_last.ckpt")
+
+    if hparams.mode.lower() == "test":
+        trainer.test(model)

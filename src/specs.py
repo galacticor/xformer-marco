@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 @dataclass
 class ArgParams:
+    mode: str = "train"
     run_name: str
     model_name: str
     data_dir: str

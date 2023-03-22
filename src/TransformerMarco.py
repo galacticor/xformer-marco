@@ -306,7 +306,28 @@ class TransformerMarco(pl.LightningModule):
         """
 
         self._store_trec_output(outputs)
-        return
+        mrr, ndcg, rmap = self._get_retrieval_score(outputs)
+        mrr10, ndcg10, rmap10 = self._get_retrieval_score(outputs, k=10)
+        
+        metric_dict = { 
+            "mrr": mrr, 
+            "mrr10": mrr10, 
+            "ndcg": ndcg,
+            "ndcg10": ndcg10,
+            "map": rmap,
+            "map10": rmap10,
+        }
+
+        if self.logger:
+            self.logger.log_metrics(metric_dict)
+
+        self.log_dict(metric_dict)
+
+        print(f"\nDEV:: MRR: {mrr} || MRR@10: {mrr10} || NDCG: {ndcg} || NDCG@10: {ndcg10} || MAP: {rmap} || MAP@10: {rmap10}")
+        
+        metric_dict["progress_bar"] = metric_dict
+
+        return metric_dict
 
     def _store_trec_output(self, outputs):
 
