@@ -26,12 +26,9 @@ if __name__ == "__main__":
     hparams = ArgParams(
         run_name="MSMARCO",
         model_name=bert_model_name,
-    #     ckpt_path=CHECKPOINT_PATH,
         ckpt_path=None,
         validation=20,
         training=50,
-
-
         learning_rate=1e-4,
         num_warmup_steps=100,
         num_training_steps=30000,
@@ -75,6 +72,9 @@ if __name__ == "__main__":
 
     parser.add_argument("--training", type=int, default=100,
                         help="Training Size")
+
+    parser.add_argument("--test", type=int, default=2048,
+                        help="Test Sequence Size")
     
     parser.add_argument("--mode", type=str, default="train",
                         help="Mode: train, test, inference")
@@ -124,4 +124,6 @@ if __name__ == "__main__":
         trainer.save_checkpoint(f"{hparams.model_name}_{hparams.run_name}_sz{hparams.training}:{hparams.validation}_bs{hparams.data_loader_bs}:{hparams.val_data_loader_bs}_last.ckpt")
 
     if hparams.mode.lower() == "test":
+        trainer.test(model)
+        model.update_test(1024)
         trainer.test(model)

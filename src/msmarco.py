@@ -132,30 +132,45 @@ class MarcoDataset(Dataset):
         self.tokenizer = tokenizer
         self.max_seq_len = max_seq_len
 
-        self.relations = pd.read_csv(
-            os.path.join(INPUT_DIR, f"msmarco-doc{mode}-qrels.tsv"),
-            sep=" ",
-            header=None,
-            names=["qid", "0", "did", "label"],
-        )
+        # self.relations = pd.read_csv(
+        #     os.path.join(INPUT_DIR, f"msmarco-doc{mode}-qrels.tsv"),
+        #     sep=" ",
+        #     header=None,
+        #     names=["qid", "0", "did", "label"],
+        # )
         if mode == "dev":
             self.top100 = pd.read_csv(
                 os.path.join(DATA_DIR, f"validation_{args.validation}k.csv"),
                 dtype={'qid': 'int32', 'rank': 'int8', "score": "float16"},
                 usecols=["qid", "did", "label", "rank", "score"],
             )
+        else:
+            self.top100 = pd.read_csv(
+                os.path.join(DATA_DIR, f"test_{args.test}.csv"),
+                dtype={'qid': 'int32', 'rank': 'int8', "score": "float16"},
+                usecols=["qid", "did", "label", "rank", "score"],
+            )
+            print(f"Size test {args.test}")
+
         if mode == "train":
             self.data = pd.read_csv(
                 os.path.join(DATA_DIR, f"training_{args.training}k.csv"),
                 dtype={'qid': 'int32', "rank": "int8", "score": "float16"},
                 usecols=["qid", "did", "label", "query", "doc"],
             )
-        else:
+        elif mode == "dev":
             self.data = pd.read_csv(
                 os.path.join(DATA_DIR, f"validation_{args.validation}k.csv"),
                 dtype={'qid': 'int32'},
                 usecols=["qid", "did", "label", "query", "doc"],
             )
+        else:
+            self.data = pd.read_csv(
+                os.path.join(DATA_DIR, f"test_{args.test}.csv"),
+                dtype={'qid': 'int32'},
+                usecols=["qid", "did", "label", "query", "doc"],
+            )
+            print(f"Size test {args.test}")
 
         print(f"{mode} set len:", len(self.data))
 

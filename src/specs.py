@@ -3,7 +3,6 @@ from dataclasses import dataclass
 
 @dataclass
 class ArgParams:
-    mode: str = "train"
     run_name: str
     model_name: str
     data_dir: str
@@ -12,6 +11,7 @@ class ArgParams:
     val_data_loader_bs: int
     num_workers: int
     trainer_batch_size: int
+    mode: str = "train"
     device: int = 1
     accelerator: str = "cpu"
     epochs: int = 2
@@ -26,3 +26,4 @@ class ArgParams:
     ckpt_path: str = None
     validation: int = 20
     training: int = 50
+    test: int = 2048

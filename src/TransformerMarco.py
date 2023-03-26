@@ -110,6 +110,9 @@ class TransformerMarco(pl.LightningModule):
             collate_fn=TransformerMarco.collate_fn,
         )
         return self.val_dataloader_object
+    
+    def update_test(self, test: int):
+        self.hparams.test = test
 
     def test_dataloader(self):
         dataset = self.DatasetClass(
@@ -129,6 +132,7 @@ class TransformerMarco(pl.LightningModule):
             sampler=sampler,
             collate_fn=TransformerMarco.collate_fn,
         )
+        print(f"Load test dataloader {self.hparams.test}")
         return self.test_dataloader_object
 
     def training_step(self, batch, batch_nb):
@@ -306,8 +310,8 @@ class TransformerMarco(pl.LightningModule):
         """
 
         self._store_trec_output(outputs)
-        mrr, ndcg, rmap = self._get_retrieval_score(outputs)
-        mrr10, ndcg10, rmap10 = self._get_retrieval_score(outputs, k=10)
+        mrr, ndcg, rmap = self._get_retrieval_score(outputs, mode="test")
+        mrr10, ndcg10, rmap10 = self._get_retrieval_score(outputs, k=10, mode="test")
         
         metric_dict = { 
             "mrr": mrr, 
@@ -349,7 +353,7 @@ class TransformerMarco(pl.LightningModule):
         df["Q0"] = "Q0"
         df["run_name"] = self.hparams.run_name
         df["rank"] = df.groupby("qid")["prob"].rank(ascending=False)
-        df.rank = df.rank.astype(int)
+        df["rank"] = df["rank"].astype(int)
         df = df[["qid", "Q0", "did", "rank", "prob", "run_name"]]
         df.to_csv(f"{self.hparams.run_name}.tsv", sep=" ", header=False, index=False)
         return
