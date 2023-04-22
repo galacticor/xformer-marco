@@ -120,7 +120,7 @@ if __name__ == "__main__":
     trainer, model = runner(hparams)
 
     if hparams.mode.lower() == "train":
-        trainer.fit(model)
+        trainer.fit(model, ckpt_path=hparams.ckpt_path)
         trainer.save_checkpoint(f"{hparams.model_name}_{hparams.run_name}_sz{hparams.training}:{hparams.validation}_bs{hparams.data_loader_bs}:{hparams.val_data_loader_bs}_last.ckpt")
 
     if hparams.mode.lower() == "test":

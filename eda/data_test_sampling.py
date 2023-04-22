@@ -19,11 +19,15 @@ for i in range(len(conditions)):
     name = names[i]
     top100 = top100val.copy()
 
-    # exclude query that doesnt meet the condition
+    # exclude query that doesn't meet the condition
+    # menandai panjang sekuens yang sesuai kondisi lalu 
+    # mengecualikan query dengan dokumen jawaban yang tidak sesuai kondisi
     top100["is_condition"] = top100["seq_len"].apply(condition)
     qid_exclude = list(top100[ (top100.label == 1) & (top100.is_condition == False) ].qid.unique())
 
     # get top 100 query that have higher number of documents that meets condition
+    # menghitung jumlah dokumen yang sesuai kondisi untuk setiap query lalu
+    # mengambil 100 query dengan jumlah dokumen yang sesuai kondisi terbanyak
     tmpdf = pd.DataFrame({'total' : top100val.groupby(["qid", "is_condition"]).size()}).reset_index()
     tmpdf = tmpdf[(tmpdf.is_condition == True) & (~tmpdf.qid.isin(qid_exclude))].sort_values(["total"], ascending=False)[:100]
     qids_long = tmpdf.qid.tolist()
