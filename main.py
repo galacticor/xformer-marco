@@ -3,9 +3,15 @@ import sys
 import torch
 import argparse
 
-from src import longformer
+from src.longformer import main as runner
 from src.constants import INPUT_DIR
 from src.specs import ArgParams
+
+longformer_model_name = "allenai/longformer-base-4096"
+nystromformer_model_name = "uw-madison/nystromformer-4096"
+reformer_model_name = "robingeibel/reformer-finetuned-big_patent-4096"
+bigbird_model_name = "google/bigbird-roberta-base"
+bert_model_name = "bert-base-uncased"
 
 
 def validate(params: ArgParams) -> ArgParams:
@@ -14,15 +20,7 @@ def validate(params: ArgParams) -> ArgParams:
     return params
 
 
-if __name__ == "__main__":
-    args = sys.argv
-
-    longformer_model_name = "allenai/longformer-base-4096"
-    nystromformer_model_name = "uw-madison/nystromformer-4096"
-    reformer_model_name = "robingeibel/reformer-finetuned-big_patent-4096"
-    bigbird_model_name = "google/bigbird-roberta-base"
-    bert_model_name = "bert-base-uncased"
-
+def get_hparams(model_name: str = "bert"):
     hparams = ArgParams(
         run_name="MSMARCO",
         model_name=bert_model_name,
@@ -46,6 +44,30 @@ if __name__ == "__main__":
         device=2,
         num_nodes=1
     )
+
+    if param_from_parser.model_name == "bert":
+        hparams.model_name = bert_model_name
+        hparams.max_seq_len = 512
+
+    if param_from_parser.model_name == "longformer":
+        hparams.model_name = longformer_model_name
+        hparams.max_seq_len = 4096
+
+    if param_from_parser.model_name == "nystromformer":
+        hparams.model_name = nystromformer_model_name
+        hparams.max_seq_len = 4096
+
+    if param_from_parser.model_name == "bigbird":
+        hparams.model_name = bigbird_model_name
+        hparams.max_seq_len = 4096
+
+    return hparams
+
+
+if __name__ == "__main__":
+    args = sys.argv
+
+    hparams = get_hparams()
 
     parser = argparse.ArgumentParser(description='Transformer-MARCO')
     
@@ -81,30 +103,6 @@ if __name__ == "__main__":
 
     param_from_parser = parser.parse_args()
 
-    if param_from_parser.model_name == "bert":
-        runner = longformer.main
-        hparams.model_name = bert_model_name
-        hparams.max_seq_len = 512
-
-    if param_from_parser.model_name == "longformer":
-        runner = longformer.main
-        hparams.model_name = longformer_model_name
-        hparams.max_seq_len = 4096
-
-    if param_from_parser.model_name == "nystromformer":
-        runner = longformer.main
-        hparams.model_name = nystromformer_model_name
-        hparams.max_seq_len = 4096
-
-    if param_from_parser.model_name == "bigbird":
-        runner = longformer.main
-        hparams.model_name = bigbird_model_name
-        hparams.max_seq_len = 4096
-
-
-    if hparams.val_data_loader_bs <= 0:
-        hparams.val_data_loader_bs = hparams.data_loader_bs
-
     hparams.data_loader_bs = param_from_parser.data_loader_bs
     hparams.val_data_loader_bs = param_from_parser.val_data_loader_bs
     hparams.num_workers = param_from_parser.num_workers
@@ -112,6 +110,9 @@ if __name__ == "__main__":
     hparams.ckpt_path = param_from_parser.ckpt_path
     hparams.training = param_from_parser.training
     hparams.validation = param_from_parser.validation
+
+    if hparams.val_data_loader_bs <= 0:
+        hparams.val_data_loader_bs = hparams.data_loader_bs
 
     hparams = validate(hparams)
 
@@ -124,6 +125,4 @@ if __name__ == "__main__":
         trainer.save_checkpoint(f"{hparams.model_name}_{hparams.run_name}_sz{hparams.training}:{hparams.validation}_bs{hparams.data_loader_bs}:{hparams.val_data_loader_bs}_last.ckpt")
 
     if hparams.mode.lower() == "test":
-        trainer.test(model)
-        model.update_test(1024)
         trainer.test(model)

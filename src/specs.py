@@ -26,4 +26,4 @@ class ArgParams:
     ckpt_path: str = None
     validation: int = 20
     training: int = 50
-    test: int = 2048
+    test: str = 2048

@@ -111,7 +111,7 @@ class TransformerMarco(pl.LightningModule):
         )
         return self.val_dataloader_object
     
-    def update_test(self, test: int):
+    def update_test(self, test: str):
         self.hparams.test = test
 
     def test_dataloader(self):
