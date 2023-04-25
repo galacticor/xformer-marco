@@ -9,19 +9,19 @@ from src.longformer import main as runner
 from src.specs import ArgParams
 
 
-BASE_DIR_CHECKPOINTS = "/workspace/old_workspace/xformer-marcoxformer-marco/3sizvf8a/checkpoints/uw-madison/"
+BASE_DIR_CHECKPOINTS = "/workspace/old_workspace/xformer-marco/xformer-marco/3sizvf8a/checkpoints/uw-madison/"
 
 CHECKPOINTS = [
-    'nystromformer-4096_epoch=10-step=17589-val_epoch_loss=0.12.ckpt',
-    'nystromformer-4096_epoch=11-step=19188-val_epoch_loss=0.12.ckpt',
-    'nystromformer-4096_epoch=12-step=20787-val_epoch_loss=0.12.ckpt',
-    'nystromformer-4096_epoch=13-step=22386-val_epoch_loss=0.12.ckpt',
-    'nystromformer-4096_epoch=14-step=23985-val_epoch_loss=0.12.ckpt',
-    'nystromformer-4096_epoch=5-step=9594-val_epoch_loss=0.12.ckpt',
-    'nystromformer-4096_epoch=6-step=11193-val_epoch_loss=0.12.ckpt',
-    'nystromformer-4096_epoch=7-step=12792-val_epoch_loss=0.12.ckpt',
-    'nystromformer-4096_epoch=8-step=14391-val_epoch_loss=0.12.ckpt',
-    'nystromformer-4096_epoch=9-step=15990-val_epoch_loss=0.12.ckpt',
+    "nystromformer-4096_epoch_10-step_17589-val_epoch_loss_0.12.ckpt",
+    "nystromformer-4096_epoch_11-step_19188-val_epoch_loss_0.12.ckpt",
+    "nystromformer-4096_epoch_12-step_20787-val_epoch_loss_0.12.ckpt",
+    "nystromformer-4096_epoch_13-step_22386-val_epoch_loss_0.12.ckpt",
+    "nystromformer-4096_epoch_14-step_23985-val_epoch_loss_0.12.ckpt",
+    "nystromformer-4096_epoch_5-step_9594-val_epoch_loss_0.12.ckpt",
+    "nystromformer-4096_epoch_6-step_11193-val_epoch_loss_0.12.ckpt",
+    "nystromformer-4096_epoch_7-step_12792-val_epoch_loss_0.12.ckpt",
+    "nystromformer-4096_epoch_8-step_14391-val_epoch_loss_0.12.ckpt",
+    "nystromformer-4096_epoch_9-step_15990-val_epoch_loss_0.12.ckpt",
 ]
 
 
