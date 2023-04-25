@@ -4,7 +4,7 @@ import argparse
 import os
 import json
 
-from main import get_hparams, validate
+from src.helper import get_hparams, validate
 from src.longformer import main as runner
 from src.specs import ArgParams
 
