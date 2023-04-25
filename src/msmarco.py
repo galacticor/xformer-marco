@@ -4,7 +4,7 @@ import torch
 import json
 from torch.utils.data import Dataset
 
-from .constants import DATA_DIR, DOCS_FILE, DOCS_DIR, INPUT_DIR
+from .constants import DATA_DIR, DOCS_FILE, DOCS_DIR, INPUT_DIR, TEST_DIR
 from .specs import ArgParams
 
 
@@ -146,7 +146,7 @@ class MarcoDataset(Dataset):
             )
         else:
             self.top100 = pd.read_csv(
-                os.path.join(DATA_DIR, f"test_{args.test}.csv"),
+                os.path.join(TEST_DIR, f"test_{args.test}.csv"),
                 dtype={'qid': 'int32', 'rank': 'int8', "score": "float16"},
                 usecols=["qid", "did", "label", "rank", "score"],
             )
@@ -166,7 +166,7 @@ class MarcoDataset(Dataset):
             )
         else:
             self.data = pd.read_csv(
-                os.path.join(DATA_DIR, f"test_{args.test}.csv"),
+                os.path.join(TEST_DIR, f"test_{args.test}.csv"),
                 dtype={'qid': 'int32'},
                 usecols=["qid", "did", "label", "query", "doc"],
             )
