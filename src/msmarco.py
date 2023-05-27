@@ -3,6 +3,7 @@ import pandas as pd
 import torch
 import json
 from torch.utils.data import Dataset
+from transformers import PreTrainedTokenizer
 
 from .constants import DATA_DIR, DOCS_FILE, DOCS_DIR, INPUT_DIR, TEST_DIR
 from .specs import ArgParams
@@ -129,7 +130,7 @@ class MarcoDataset(Dataset):
     docs_file = DOCS_FILE
     def __init__(self, data_dir=None, mode="train", tokenizer=None, max_seq_len=512, args: ArgParams=None):
         self.data_dir = data_dir or self.data_dir
-        self.tokenizer = tokenizer
+        self.tokenizer: PreTrainedTokenizer = tokenizer
         self.max_seq_len = max_seq_len
 
         # self.relations = pd.read_csv(
